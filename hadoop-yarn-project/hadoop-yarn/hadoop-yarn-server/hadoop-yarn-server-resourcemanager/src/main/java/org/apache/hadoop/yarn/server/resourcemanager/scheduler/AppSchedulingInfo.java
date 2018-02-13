@@ -55,6 +55,7 @@ public class AppSchedulingInfo {
   private final ApplicationAttemptId applicationAttemptId;
   final ApplicationId applicationId;
   private String queueName;
+  private ContainerWaitTimeUnit waitTime;
   Queue queue;
   final String user;
   // TODO making containerIdCounter long
@@ -86,6 +87,7 @@ public class AppSchedulingInfo {
     this.activeUsersManager = activeUsersManager;
     this.containerIdCounter = new AtomicLong(epoch << EPOCH_BIT_SHIFT);
     this.appResourceUsage = appResourceUsage;
+    this.waitTime = new ContainerWaitTimeUnit();
   }
 
   public ApplicationId getApplicationId() {
@@ -219,6 +221,9 @@ public class AppSchedulingInfo {
             request.getCapability());
         metrics.decrPendingResources(user, lastRequestContainers,
             lastRequestCapability);
+
+        waitTime.addPendingContainers(request.getNumContainers());
+        waitTime.removePendingContainers(lastRequestContainers);
         
         // update queue:
         Resource increasedResource =
@@ -256,7 +261,25 @@ public class AppSchedulingInfo {
     return ((null != requestOneLabelExp)
         && !(requestOneLabelExp.equals(requestTwoLabelExp)));
   }
-
+/**
+  * Update total container wait time.
+  */
+      synchronized public void updateContainerWaitTime() {
+      long lastTimeStamp = waitTime.getTimeStamp();
+      int pendingContainers = waitTime.getPendingContainers();
+      long currentTime = System.currentTimeMillis();
+      if (lastTimeStamp == 0) {
+      // First time request.
+      waitTime.setTimeStamp(currentTime);
+      return;
+    }
+    long deltaWaitTime = (currentTime - lastTimeStamp) * pendingContainers;
+    waitTime.addTotalWaitTime(deltaWaitTime);
+    // Update the current time stamp.
+    waitTime.setTimeStamp(currentTime);
+    // Update queue-metrics
+    queue.getMetrics().addContainerWaitTime(deltaWaitTime);
+  }
   /**
    * The ApplicationMaster is updating the blacklist
    *
@@ -352,6 +375,7 @@ public class AppSchedulingInfo {
     }
     metrics.allocateResources(user, 1, request.getCapability(), true);
     metrics.incrNodeTypeAggregations(user, type);
+    waitTime.removePendingContainers(1);
     return resourceRequests;
   }
 
@@ -518,6 +542,10 @@ public class AppSchedulingInfo {
 
   public synchronized Set<String> getBlackList() {
     return this.blacklist;
+  }
+
+  public synchronized ContainerWaitTimeUnit getWaitTime() {
+    return this.waitTime;
   }
 
   public synchronized Set<String> getBlackListCopy() {

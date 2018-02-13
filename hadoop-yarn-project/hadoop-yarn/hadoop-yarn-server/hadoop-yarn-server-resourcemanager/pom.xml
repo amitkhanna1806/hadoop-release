@@ -33,6 +33,21 @@
   </properties>
 
   <dependencies>
+   <dependency>
+       <groupId>org.postgresql</groupId>
+       <artifactId>postgresql</artifactId>
+   </dependency>
+   <dependency>
+       <groupId>com.h2database</groupId>
+       <artifactId>h2</artifactId>
+       <scope>test</scope>
+   </dependency>
+   <dependency>
+       <groupId>com.tngtech.java</groupId>
+       <artifactId>junit-dataprovider</artifactId>
+       <scope>test</scope>
+   </dependency>
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>

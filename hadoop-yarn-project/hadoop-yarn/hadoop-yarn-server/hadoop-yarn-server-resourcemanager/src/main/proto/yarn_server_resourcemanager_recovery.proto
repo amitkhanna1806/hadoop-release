@@ -84,6 +84,8 @@ message ApplicationAttemptStateDataProto {
     optional int64 memory_seconds = 10;
     optional int64 vcore_seconds = 11;
     optional int64 finish_time = 12;
+    optional int64 am_container_wait_time = 13 [default = 0];
+    optional int64 container_wait_time = 14 [default = 0];
 }
 
 message EpochProto {

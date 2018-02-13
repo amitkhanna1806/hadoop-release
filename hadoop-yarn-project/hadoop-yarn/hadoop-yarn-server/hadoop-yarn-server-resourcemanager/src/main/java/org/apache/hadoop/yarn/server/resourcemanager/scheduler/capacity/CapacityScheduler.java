@@ -104,6 +104,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica.FiCaS
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.AppAddedSchedulerEvent;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.AppAttemptAddedSchedulerEvent;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.AppAttemptRemovedSchedulerEvent;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.AppAttemptUpdatedSchedulerEvent;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.AppRemovedSchedulerEvent;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.ContainerExpiredSchedulerEvent;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.ContainerRescheduledEvent;
@@ -956,6 +957,7 @@ public class CapacityScheduler extends
           "or non existant application " + applicationAttemptId);
       return EMPTY_ALLOCATION;
     }
+
     
     // Sanity check
     SchedulerUtils.normalizeRequests(
@@ -978,6 +980,11 @@ public class CapacityScheduler extends
             "application " + applicationAttemptId);
         return EMPTY_ALLOCATION;
       }
+
+
+      // Update the container wait time.
+      application.updateContainerWaitTime();
+
 
       if (!ask.isEmpty()) {
 
@@ -1421,6 +1428,7 @@ public class CapacityScheduler extends
           RMContainerEventType.EXPIRE);
     }
     break;
+
     case DROP_RESERVATION:
     {
       ContainerPreemptEvent dropReservationEvent = (ContainerPreemptEvent)event;
@@ -1452,9 +1460,26 @@ public class CapacityScheduler extends
       recoverResourceRequestForContainer(container);
     }
     break;
+    case APP_ATTEMPT_UPDATED :
+    {
+      AppAttemptUpdatedSchedulerEvent attemptScheduledEvent =
+          (AppAttemptUpdatedSchedulerEvent) event;
+      updatedApplicationAttempt(
+          attemptScheduledEvent.getApplicationAttemptId(),
+          attemptScheduledEvent.getWaitTime());
+    }
+    break;
     default:
       LOG.error("Invalid eventtype " + event.getType() + ". Ignoring!");
     }
+  }
+
+  private void updatedApplicationAttempt(
+      ApplicationAttemptId applicationAttemptId, long waitTime) {
+    // Update queue metrics.
+    FiCaSchedulerApp application = getApplicationAttempt(applicationAttemptId);
+    CSQueue queue = (CSQueue) application.getQueue();
+    queue.getMetrics().addAMContainerWaitTime(waitTime);
   }
 
   private synchronized void addNode(RMNode nodeManager) {

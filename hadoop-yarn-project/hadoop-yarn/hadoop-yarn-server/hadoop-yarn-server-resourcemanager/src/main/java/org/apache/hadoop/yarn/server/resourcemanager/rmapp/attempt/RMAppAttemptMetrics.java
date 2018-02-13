@@ -33,7 +33,9 @@ import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.server.resourcemanager.RMContext;
 import org.apache.hadoop.yarn.server.resourcemanager.rmcontainer.RMContainer;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.NodeType;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerAppReport;
 import org.apache.hadoop.yarn.util.resource.Resources;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.AppAttemptUpdatedSchedulerEvent;
 
 public class RMAppAttemptMetrics {
   private static final Log LOG = LogFactory.getLog(RMAppAttemptMetrics.class);
@@ -50,8 +52,14 @@ public class RMAppAttemptMetrics {
   private WriteLock writeLock;
   private AtomicLong finishedMemorySeconds = new AtomicLong(0);
   private AtomicLong finishedVcoreSeconds = new AtomicLong(0);
+  // -1000 value of the container wait time represents, it's a unfinished
+  // recovered attempt. We should not update those wait time.
+  public static final long INVALID_WAIT_TIME_VALUE = -1000;
+  private AtomicLong containerWaitTime = new AtomicLong(0);
+  private AtomicLong amContainerWaitTime = new AtomicLong(0);
   private RMContext rmContext;
-
+  // tmp variables
+  private long lastStartTime;
   private int[][] localityStatistics =
       new int[NodeType.values().length][NodeType.values().length];
   private volatile int totalAllocatedContainers;
@@ -63,6 +71,12 @@ public class RMAppAttemptMetrics {
     this.readLock = lock.readLock();
     this.writeLock = lock.writeLock();
     this.rmContext = rmContext;
+  }
+
+  // This is called during recovery of an attempt.
+  public void updateContainerWaitTime(long amContainerWaitTime, long containerWaitTime) {
+    this.amContainerWaitTime.set(amContainerWaitTime);
+    this.containerWaitTime.set(containerWaitTime);
   }
 
   public void updatePreemptionInfo(Resource resource, RMContainer container) {
@@ -154,5 +168,33 @@ public class RMAppAttemptMetrics {
 
   public void setApplicationAttemptHeadRoom(Resource headRoom) {
     this.applicationHeadroom = headRoom;
+  }
+
+   /*
+   * Get the stored wait time from scheduledingInfo.
+   * SchedulingInfo only exists until the application is running.
+   * After that we have to save the wait time locally.
+   */
+  public long getContainerWaitTime() {
+    SchedulerAppReport schinfo =
+        this.rmContext.getScheduler().getSchedulerAppInfo(attemptId);
+    if (schinfo != null && schinfo.getContainerWaitTime() > 0
+        && containerWaitTime.get() != INVALID_WAIT_TIME_VALUE) {
+      this.containerWaitTime.set(schinfo.getContainerWaitTime());
+    }
+    return containerWaitTime.get();
+  }
+  public void addAmContainerWaitTime(long time) {
+    if (this.amContainerWaitTime.get() != INVALID_WAIT_TIME_VALUE)
+      this.amContainerWaitTime.addAndGet(time);
+  }
+  public long getAmContainerWaitTime() {
+    return this.amContainerWaitTime.get();
+  }
+  public long getLastStartTime() {
+    return this.lastStartTime;
+  }
+  public void setLastStartTime(long lastStartTime) {
+    this.lastStartTime = lastStartTime;
   }
 }

@@ -95,6 +95,9 @@ public class AppInfo {
   protected int numNonAMContainerPreempted;
   protected int numAMContainerPreempted;
 
+  protected long containerWaitTime;
+  protected long amContainerWaitTime;
+
   protected List<ResourceRequest> resourceRequests;
 
   protected LogAggregationStatus logAggregationStatus;
@@ -187,6 +190,8 @@ public class AppInfo {
           appMetrics.getResourcePreempted().getVirtualCores();
       memorySeconds = appMetrics.getMemorySeconds();
       vcoreSeconds = appMetrics.getVcoreSeconds();
+      containerWaitTime = appMetrics.getTotalContainerWaitTime();
+      amContainerWaitTime = appMetrics.getTotalAMContainerWaitTime();
     }
   }
 
@@ -325,4 +330,8 @@ public class AppInfo {
   public LogAggregationStatus getLogAggregationStatus() {
     return this.logAggregationStatus;
   }
+
+  public long getContainerWaitTime() {return containerWaitTime;}
+
+  public long getAMContainerWaitTime() {return amContainerWaitTime;}
 }

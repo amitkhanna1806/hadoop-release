@@ -57,7 +57,8 @@ public class ClusterMetricsInfo {
   protected int decommissionedNodes;
   protected int rebootedNodes;
   protected int activeNodes;
-
+  protected long containerWaitTime;
+  protected long amContainerWaitTime;
   public ClusterMetricsInfo() {
   } // JAXB needs this
 
@@ -84,6 +85,9 @@ public class ClusterMetricsInfo {
     this.containersAllocated = metrics.getAllocatedContainers();
     this.containersPending = metrics.getPendingContainers();
     this.containersReserved = metrics.getReservedContainers();
+
+    this.containerWaitTime = metrics.getContainerWaitTime();
+    this.amContainerWaitTime = metrics.getAMContainerWaitTime();
 
     this.totalMB = availableMB + allocatedMB;
     this.totalVirtualCores = availableVirtualCores + allocatedVirtualCores;
@@ -187,5 +191,9 @@ public class ClusterMetricsInfo {
   public int getDecommissionedNodes() {
     return this.decommissionedNodes;
   }
+
+  public long getContainerWatiTime() {return this.containerWaitTime;}
+
+  public long getAMContainerWaitTime() {return this.amContainerWaitTime;}
 
 }

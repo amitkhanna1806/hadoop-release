@@ -26,15 +26,34 @@ public class RMAppMetrics {
   final int numAMContainersPreempted;
   final long memorySeconds;
   final long vcoreSeconds;
+  long totalContainerWaitTime;
+  long totalAMContainerWaitTime;
+
+
+  public RMAppMetrics(Resource resourcePreempted,
+                      int numNonAMContainersPreempted, int numAMContainersPreempted,
+                      long memorySeconds, long vcoreSeconds){
+    this(resourcePreempted, numNonAMContainersPreempted,
+        numAMContainersPreempted, memorySeconds, vcoreSeconds, 0, 0);
+  }
+
+  public RMAppMetrics(Resource resourcePreempted,
+                      int numNonAMContainersPreempted, int numAMContainersPreempted,
+                      long memorySeconds, long vcoreSeconds, long containerWaitTime){
+    this(resourcePreempted, numNonAMContainersPreempted,
+        numAMContainersPreempted, memorySeconds, vcoreSeconds, containerWaitTime, 0);
+  }
 
   public RMAppMetrics(Resource resourcePreempted,
       int numNonAMContainersPreempted, int numAMContainersPreempted,
-      long memorySeconds, long vcoreSeconds) {
+      long memorySeconds, long vcoreSeconds, long totalContainerWaitTime, long totalAmContainerWaitTime ) {
     this.resourcePreempted = resourcePreempted;
     this.numNonAMContainersPreempted = numNonAMContainersPreempted;
     this.numAMContainersPreempted = numAMContainersPreempted;
     this.memorySeconds = memorySeconds;
     this.vcoreSeconds = vcoreSeconds;
+    this.totalAMContainerWaitTime = totalAmContainerWaitTime;
+    this.totalContainerWaitTime = totalContainerWaitTime;
   }
 
   public Resource getResourcePreempted() {
@@ -56,4 +75,7 @@ public class RMAppMetrics {
   public long getVcoreSeconds() {
     return vcoreSeconds;
   }
+
+  public long getTotalContainerWaitTime() {return totalContainerWaitTime;}
+  public long getTotalAMContainerWaitTime() {return totalAMContainerWaitTime;}
 }

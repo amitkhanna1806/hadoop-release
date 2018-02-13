@@ -18,32 +18,30 @@
 
 package org.apache.hadoop.yarn.server.resourcemanager.scheduler.event;
 
-public enum SchedulerEventType {
+import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 
-  // Source: Node
-  NODE_ADDED,
-  NODE_REMOVED,
-  NODE_UPDATE,
-  NODE_RESOURCE_UPDATE,
-  NODE_LABELS_UPDATE,
+/**
+ * This event is triggered when an attempt is scheduled. 
+ * This is used for updating the scheduled time in the RMAppAttempt object 
+ * which in turn is used to calculate the AM container wait time.
+ */
+public class AppAttemptUpdatedSchedulerEvent extends SchedulerEvent {
 
-  // Source: RMApp
-  APP_ADDED,
-  APP_REMOVED,
+  private final ApplicationAttemptId applicationAttemptId;
+  private final long waitTime;
 
-  // Source: RMAppAttempt
-  APP_ATTEMPT_ADDED,
-  APP_ATTEMPT_REMOVED,
-  APP_ATTEMPT_UPDATED,
+  public AppAttemptUpdatedSchedulerEvent(
+      ApplicationAttemptId applicationAttemptId, long waitTime) {
+    super(SchedulerEventType.APP_ATTEMPT_UPDATED);
+    this.applicationAttemptId = applicationAttemptId;
+    this.waitTime = waitTime;
+  }
 
-  // Source: ContainerAllocationExpirer
-  CONTAINER_EXPIRED,
+  public ApplicationAttemptId getApplicationAttemptId() {
+    return applicationAttemptId;
+  }
 
-  // Source: RMContainer
-  CONTAINER_RESCHEDULED,
-
-  // Source: SchedulingEditPolicy
-  DROP_RESERVATION,
-  PREEMPT_CONTAINER,
-  KILL_CONTAINER
+  public long getWaitTime() {
+    return this.waitTime;
+  }
 }

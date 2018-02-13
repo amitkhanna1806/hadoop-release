@@ -35,12 +35,24 @@ import org.apache.hadoop.yarn.util.Records;
 @Public
 @Unstable
 public abstract class ApplicationAttemptStateData {
+
   public static ApplicationAttemptStateData newInstance(
       ApplicationAttemptId attemptId, Container container,
       Credentials attemptTokens, long startTime, RMAppAttemptState finalState,
       String finalTrackingUrl, String diagnostics,
       FinalApplicationStatus amUnregisteredFinalStatus, int exitStatus,
       long finishTime, long memorySeconds, long vcoreSeconds) {
+    return newInstance(attemptId, container, attemptTokens, startTime, finalState,
+        finalTrackingUrl, diagnostics, amUnregisteredFinalStatus, exitStatus,
+        finishTime, memorySeconds, vcoreSeconds, 0l, 0l);
+  }
+
+  public static ApplicationAttemptStateData newInstance(
+      ApplicationAttemptId attemptId, Container container,
+      Credentials attemptTokens, long startTime, RMAppAttemptState finalState,
+      String finalTrackingUrl, String diagnostics,
+      FinalApplicationStatus amUnregisteredFinalStatus, int exitStatus,
+      long finishTime, long memorySeconds, long vcoreSeconds, long amContainerWaitTime, long containerWaitTime) {
     ApplicationAttemptStateData attemptStateData =
         Records.newRecord(ApplicationAttemptStateData.class);
     attemptStateData.setAttemptId(attemptId);
@@ -55,6 +67,8 @@ public abstract class ApplicationAttemptStateData {
     attemptStateData.setFinishTime(finishTime);
     attemptStateData.setMemorySeconds(memorySeconds);
     attemptStateData.setVcoreSeconds(vcoreSeconds);
+    attemptStateData.setAmContainerWaitTime(amContainerWaitTime);
+    attemptStateData.setContainerWaitTime(containerWaitTime);
     return attemptStateData;
   }
 
@@ -65,21 +79,30 @@ public abstract class ApplicationAttemptStateData {
     return newInstance(attemptId, masterContainer, attemptTokens,
         startTime, null, "N/A", "", null, ContainerExitStatus.INVALID, 0,
         memorySeconds, vcoreSeconds);
-    }
+  }
 
+  public static ApplicationAttemptStateData newInstance(
+      ApplicationAttemptId attemptId, Container masterContainer,
+      Credentials attemptTokens, long startTime, long memorySeconds,
+      long vcoreSeconds, long amContainerWaitTime, long containerWaitTime) {
+    return newInstance(attemptId, masterContainer, attemptTokens,
+        startTime, null, "N/A", "", null, ContainerExitStatus.INVALID, 0,
+        memorySeconds, vcoreSeconds, amContainerWaitTime, containerWaitTime);
+  }
 
   public abstract ApplicationAttemptStateDataProto getProto();
 
   /**
    * The ApplicationAttemptId for the application attempt
+   *
    * @return ApplicationAttemptId for the application attempt
    */
   @Public
   @Unstable
   public abstract ApplicationAttemptId getAttemptId();
-  
+
   public abstract void setAttemptId(ApplicationAttemptId attemptId);
-  
+
   /*
    * The master container running the application attempt
    * @return Container that hosts the attempt
@@ -87,11 +110,12 @@ public abstract class ApplicationAttemptStateData {
   @Public
   @Unstable
   public abstract Container getMasterContainer();
-  
+
   public abstract void setMasterContainer(Container container);
 
   /**
    * The application attempt tokens that belong to this attempt
+   *
    * @return The application attempt tokens that belong to this attempt
    */
   @Public
@@ -102,6 +126,7 @@ public abstract class ApplicationAttemptStateData {
 
   /**
    * Get the final state of the application attempt.
+   *
    * @return the final state of the application attempt.
    */
   public abstract RMAppAttemptState getState();
@@ -111,19 +136,22 @@ public abstract class ApplicationAttemptStateData {
   /**
    * Get the original not-proxied <em>final tracking url</em> for the
    * application. This is intended to only be used by the proxy itself.
-   * 
+   *
    * @return the original not-proxied <em>final tracking url</em> for the
-   *         application
+   * application
    */
   public abstract String getFinalTrackingUrl();
 
   /**
    * Set the final tracking Url of the AM.
+   *
    * @param url
    */
   public abstract void setFinalTrackingUrl(String url);
+
   /**
-   * Get the <em>diagnositic information</em> of the attempt 
+   * Get the <em>diagnositic information</em> of the attempt
+   *
    * @return <em>diagnositic information</em> of the attempt
    */
   public abstract String getDiagnostics();
@@ -132,6 +160,7 @@ public abstract class ApplicationAttemptStateData {
 
   /**
    * Get the <em>start time</em> of the application.
+   *
    * @return <em>start time</em> of the application
    */
   public abstract long getStartTime();
@@ -140,6 +169,7 @@ public abstract class ApplicationAttemptStateData {
 
   /**
    * Get the <em>final finish status</em> of the application.
+   *
    * @return <em>final finish status</em> of the application
    */
   public abstract FinalApplicationStatus getFinalApplicationStatus();
@@ -153,6 +183,7 @@ public abstract class ApplicationAttemptStateData {
 
   /**
    * Get the <em>finish time</em> of the application attempt.
+   *
    * @return <em>finish time</em> of the application attempt
    */
   public abstract long getFinishTime();
@@ -160,7 +191,8 @@ public abstract class ApplicationAttemptStateData {
   public abstract void setFinishTime(long finishTime);
 
   /**
-  * Get the <em>memory seconds</em> (in MB seconds) of the application.
+   * Get the <em>memory seconds</em> (in MB seconds) of the application.
+   *
    * @return <em>memory seconds</em> (in MB seconds) of the application
    */
   @Public
@@ -173,6 +205,7 @@ public abstract class ApplicationAttemptStateData {
 
   /**
    * Get the <em>vcore seconds</em> of the application.
+   *
    * @return <em>vcore seconds</em> of the application
    */
   @Public
@@ -182,4 +215,20 @@ public abstract class ApplicationAttemptStateData {
   @Public
   @Unstable
   public abstract void setVcoreSeconds(long vcoreSeconds);
+
+  @Public
+  @Unstable
+  public abstract void setAmContainerWaitTime(long amContainerWaitTime);
+
+  @Public
+  @Unstable
+  public abstract void setContainerWaitTime(long containerWaitTime);
+
+  @Public
+  @Unstable
+  public abstract long getAmContainerWaitTime();
+
+  @Public
+  @Unstable
+  public abstract long getContainerWaitTime();
 }

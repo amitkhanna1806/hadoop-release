@@ -440,8 +440,10 @@ public class ContainerLaunch implements Callable<Integer> {
       // cleanup pid file if present
       if (pidFilePath != null) {
         FileContext lfs = FileContext.getLocalFSFileContext();
+/* FIX_ME
         lfs.delete(pidFilePath, false);
         lfs.delete(pidFilePath.suffix(EXIT_CODE_FILE_SUFFIX), false);
+*/
       }
     }
   }

@@ -55,6 +55,7 @@ public class CapacitySchedulerQueueInfo {
   protected QueueState state;
   protected CapacitySchedulerQueueInfoList queues;
   protected ResourceInfo resourcesUsed;
+  protected ContainerWaitTimeInfo waitTime;
   private boolean hideReservationQueues = false;
   protected ArrayList<String> nodeLabels = new ArrayList<String>();
 
@@ -84,6 +85,8 @@ public class CapacitySchedulerQueueInfo {
     queueName = q.getQueueName();
     state = q.getState();
     resourcesUsed = new ResourceInfo(queueResourceUsage.getUsed(nodeLabel));
+    waitTime = new ContainerWaitTimeInfo(q.getMetrics().getContainerWaitTime(),
+        q.getMetrics().getAMContainerWaitTime());
     if (q instanceof PlanQueue && !((PlanQueue) q).showReservationsAsQueues()) {
       hideReservationQueues = true;
     }
@@ -146,6 +149,8 @@ public class CapacitySchedulerQueueInfo {
   public ResourceInfo getResourcesUsed() {
     return resourcesUsed;
   }
+
+  public ContainerWaitTimeInfo getWaitTime() {return waitTime;}
 
   /**
    * Limit a value to a specified range.

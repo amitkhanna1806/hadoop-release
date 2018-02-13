@@ -104,7 +104,13 @@ public class RMAppBlock extends AppBlock{
         ._("Aggregate Resource Allocation:",
           String.format("%d MB-seconds, %d vcore-seconds",
               appMetrics == null ? "N/A" : appMetrics.getMemorySeconds(),
-              appMetrics == null ? "N/A" : appMetrics.getVcoreSeconds()));
+              appMetrics == null ? "N/A" : appMetrics.getVcoreSeconds()))
+        ._("Total AM Container Wait time:",
+        String.format("%.2f Seconds",
+            appMetrics.getTotalAMContainerWaitTime()/1000.0))
+        ._("Total Container Wait time:",
+        String.format("%.2f Seconds",
+            appMetrics.getTotalContainerWaitTime()/1000.0));
     pdiv._();
   }
 

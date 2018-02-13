@@ -294,6 +294,15 @@ public class SchedulerApplicationAttempt implements SchedulableEntity {
     }
     return false;
   }
+
+  public synchronized void updateContainerWaitTime(){
+    if (!isStopped) {
+      appSchedulingInfo.updateContainerWaitTime();
+    }
+  }
+  public synchronized long getContainerWaitTime(){
+    return appSchedulingInfo.getWaitTime().getTotalWaitTime();
+  }
   
   public synchronized void recoverResourceRequests(
       List<ResourceRequest> requests) {

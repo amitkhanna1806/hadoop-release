@@ -729,13 +729,15 @@ public abstract class RMStateStore extends AbstractService {
 
     AggregateAppResourceUsage resUsage =
         appAttempt.getRMAppAttemptMetrics().getAggregateAppResourceUsage();
+    long containerWaitTime = appAttempt.getRMAppAttemptMetrics().getContainerWaitTime();
+    long amContainerWaitTime = appAttempt.getRMAppAttemptMetrics().getAmContainerWaitTime();
     ApplicationAttemptStateData attemptState =
         ApplicationAttemptStateData.newInstance(
             appAttempt.getAppAttemptId(),
             appAttempt.getMasterContainer(),
             credentials, appAttempt.getStartTime(),
             resUsage.getMemorySeconds(),
-            resUsage.getVcoreSeconds());
+            resUsage.getVcoreSeconds(), amContainerWaitTime, containerWaitTime);
 
     dispatcher.getEventHandler().handle(
       new RMStateStoreAppAttemptEvent(attemptState));

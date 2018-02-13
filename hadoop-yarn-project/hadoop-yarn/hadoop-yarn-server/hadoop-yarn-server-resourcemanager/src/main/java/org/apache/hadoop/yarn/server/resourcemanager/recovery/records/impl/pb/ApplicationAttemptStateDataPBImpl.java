@@ -341,6 +341,30 @@ public class ApplicationAttemptStateDataPBImpl extends
     builder.setFinishTime(finishTime);
   }
 
+  @Override
+  public void setContainerWaitTime(long containerWaitTime) {
+    maybeInitBuilder();
+    builder.setContainerWaitTime(containerWaitTime);
+  }
+  @Override
+  public void setAmContainerWaitTime(long amContainerWaitTime) {
+    maybeInitBuilder();
+    builder.setAmContainerWaitTime(amContainerWaitTime);
+  }
+
+  @Override
+  public long getContainerWaitTime() {
+    ApplicationAttemptStateDataProtoOrBuilder p = viaProto ? proto : builder;
+    return p.getContainerWaitTime();
+  }
+  @Override
+  public long getAmContainerWaitTime() {
+    ApplicationAttemptStateDataProtoOrBuilder p = viaProto ? proto : builder;
+    return p.getAmContainerWaitTime();
+  }
+
+
+
   private static ByteBuffer convertCredentialsToByteBuffer(
       Credentials credentials) {
     ByteBuffer appAttemptTokens = null;

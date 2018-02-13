@@ -472,6 +472,24 @@ public class YarnConfiguration extends Configuration {
   public static final String ZK_RM_STATE_STORE_ROOT_NODE_ACL =
       ZK_STATE_STORE_PREFIX + "root-node.acl";
 
+  //////////////////////////////
+  // SqlStore related Configurations
+  ///////////////////////////////
+
+  public static final String DB_PRFIX = RM_PREFIX + "db.";
+  public static final String RM_DB_TYPE = DB_PRFIX + "type";
+  public static final String RM_DB_HOST = DB_PRFIX + "hostname";
+  public static final String RM_DB_DBNAME = DB_PRFIX + "dbname";
+  public static final String RM_DB_USERNAME = DB_PRFIX + "username";
+  public static final String RM_DB_PASSWORD = DB_PRFIX + "password";
+  public static final String RM_DB_PASSWORD_FILE = DB_PRFIX + "password.file";
+  public static final String RM_DB_RETRIES = DB_PRFIX + "retries";
+  public static final int DEFAULT_RM_DB_RETRIES = 0;
+  public static final String RM_DB_RETRIES_INTERVAL = RM_DB_RETRIES + ".interval.seconds";
+  public static final int DEFAULT_RM_DB_RETRIES_INTERVAL = 10;
+  public static final String RM_DB_VERIFICATION_TIMEOUT = DB_PRFIX + "verification.timeout.millis";
+  public static final int DEFAULT_RM_DB_VERIFICATION_TIMEOUT = 10 * 1000;
+
   /** HA related configs */
   public static final String RM_HA_PREFIX = RM_PREFIX + "ha.";
   public static final String RM_HA_ENABLED = RM_HA_PREFIX + "enabled";

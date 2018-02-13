@@ -38,6 +38,7 @@ import org.apache.hadoop.metrics2.lib.MetricsRegistry;
 import org.apache.hadoop.metrics2.lib.MutableCounterInt;
 import org.apache.hadoop.metrics2.lib.MutableCounterLong;
 import org.apache.hadoop.metrics2.lib.MutableGaugeInt;
+import org.apache.hadoop.metrics2.lib.MutableGaugeLong;
 import org.apache.hadoop.metrics2.lib.MutableRate;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.Resource;
@@ -82,6 +83,8 @@ public class QueueMetrics implements MetricsSource {
   @Metric("# of active users") MutableGaugeInt activeUsers;
   @Metric("# of active applications") MutableGaugeInt activeApplications;
   @Metric("App Attempt First Container Allocation Delay") MutableRate appAttemptFirstContainerAllocationDelay;
+  @Metric("Container wait time") MutableGaugeLong containerWaitTime;
+  @Metric("AM Container wait time") MutableGaugeLong amContainerWaitTime;
   private final MutableGaugeInt[] runningTime;
   private TimeBucketMetrics<ApplicationId> runBuckets;
 
@@ -242,6 +245,19 @@ public class QueueMetrics implements MetricsSource {
     }
     if (parent != null) {
       parent.submitAppAttempt(user);
+    }
+  }
+
+  public void addContainerWaitTime(long delta) {
+    containerWaitTime.incr(delta);
+    if (parent != null) {
+      parent.addContainerWaitTime(delta);
+    }
+  }
+  public void addAMContainerWaitTime(long delta) {
+    amContainerWaitTime.incr(delta);
+    if (parent != null) {
+      parent.addAMContainerWaitTime(delta);
     }
   }
 
@@ -598,4 +614,8 @@ public class QueueMetrics implements MetricsSource {
   public long getAggregateOffSwitchContainersAllocated() {
     return aggregateOffSwitchContainersAllocated.value();
   }
+
+  public long getContainerWaitTime() {return containerWaitTime.value();}
+
+  public long getAMContainerWaitTime() {return amContainerWaitTime.value();}
 }
